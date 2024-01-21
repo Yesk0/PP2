@@ -1,6 +1,6 @@
 #Example 1
 txt = "We are the so-called \"Vikings\" from the north."
-Code	Result	
+#Code	Result	
 #\'	    Single Quote	
 #\\	    Backslash	
 #\n	    New Line	
