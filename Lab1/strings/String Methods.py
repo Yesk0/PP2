@@ -1,30 +1,30 @@
-#Method	Description
-#capitalize()	Converts the first character to upper case
-#casefold()	Converts string into lower case
-#center()	Returns a centered string
-#count()	Returns the number of times a specified value occurs in a string
-#encode()	Returns an encoded version of the string
-#endswith()	Returns true if the string ends with the specified value
-#expandtabs()	Sets the tab size of the string
-#find()	Searches the string for a specified value and returns the position of where it was found
-#format()	Formats specified values in a string
-#format_map()	Formats specified values in a string
-#index()	Searches the string for a specified value and returns the position of where it was found
-#isalnum()	Returns True if all characters in the string are alphanumeric
-#isalpha()	Returns True if all characters in the string are in the alphabet
-#isascii()	Returns True if all characters in the string are ascii characters
-#isdecimal()	Returns True if all characters in the string are decimals
-#isdigit()	Returns True if all characters in the string are digits
-#sidentifier()	Returns True if the string is an identifier
-#islower()	Returns True if all characters in the string are lower case
-#isnumeric()	Returns True if all characters in the string are numeric
-#isprintable()	Returns True if all characters in the string are printable
-#isspace()	Returns True if all characters in the string are whitespaces
-#istitle()	Returns True if the string follows the rules of a title
-#isupper()	Returns True if all characters in the string are upper case
-#join()	Joins the elements of an iterable to the end of the string
-#ljust()	Returns a left justified version of the string
-#lower()	Converts a string into lower case
+# Method	Description
+# capitalize()	Converts the first character to upper case
+# casefold()	Converts string into lower case
+# center()	Returns a centered string
+# count()	Returns the number of times a specified value occurs in a string
+# encode()	Returns an encoded version of the string
+# endswith()	Returns true if the string ends with the specified value
+# expandtabs()	Sets the tab size of the string
+# find()	Searches the string for a specified value and returns the position of where it was found
+# format()	Formats specified values in a string
+# format_map()	Formats specified values in a string
+# index()	Searches the string for a specified value and returns the position of where it was found
+# isalnum()	Returns True if all characters in the string are alphanumeric
+# isalpha()	Returns True if all characters in the string are in the alphabet
+# isascii()	Returns True if all characters in the string are ascii characters
+# isdecimal()	Returns True if all characters in the string are decimals
+# isdigit()	Returns True if all characters in the string are digits
+# sidentifier()	Returns True if the string is an identifier
+# islower()	Returns True if all characters in the string are lower case
+# isnumeric()	Returns True if all characters in the string are numeric
+# isprintable()	Returns True if all characters in the string are printable
+# isspace()	Returns True if all characters in the string are whitespaces
+# istitle()	Returns True if the string follows the rules of a title
+# isupper()	Returns True if all characters in the string are upper case
+# join()	Joins the elements of an iterable to the end of the string
+# ljust()	Returns a left justified version of the string
+# lower()	Converts a string into lower case
 # lstrip()	Returns a left trim version of the string
 # maketrans()	Returns a translation table to be used in translations
 # partition()	Returns a tuple where the string is parted into three parts
