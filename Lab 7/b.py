@@ -7,7 +7,7 @@ clock = pygame.time.Clock()
 FPS = 60
 
 screen = pygame.display.set_mode((424, 780), pygame.RESIZABLE)
-background_image = pygame.image.load("song2.png")
+background_image = pygame.image.load("images/song2.png")
 background_image = pygame.transform.scale(background_image, (424, 780))
 
 running = True
@@ -15,6 +15,12 @@ i = 0
 music = ['basta.mp3', 'bum.mp3', 'inna.mp3']
 play = ['song2.png', 'song4.png', 'song6.png']
 pause = ['song1.png', 'song3.png', 'song5.png']
+
+for j in range(3):
+    music[j] = "music/" + music[j]
+    play[j] = 'images/' + play[j]
+    pause[j] = 'images/' + pause[j]
+
 
 def start(i):
     mixer.music.load(music[i])
