@@ -1,45 +1,93 @@
-# press "d" chnage cursor position to create a rectangle
-# press "f" chnage cursor position to create a circle
-# press "a" chnage cursor position to create a equilateral triangle
-# press "s" chnage cursor position to create a rhombus
-# Pressing r, g, or b keys will make the trail turn red, green, and blue respectively.
-# Pressing the left mouse button will cause the trail to become thicker.
-# Pressing the right mouse button will cause the trail to become thinner.
-
 
 import pygame
 import math
 
+#Creating colors
+BLUE  = (0, 0, 255)
+RED   = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# creating button rects
+red = pygame.Rect(100, 20, 20, 20)
+green = pygame.Rect(120, 20, 20, 20)
+blue = pygame.Rect(100, 40, 20, 20)
+black =  pygame.Rect(120, 40, 20, 20)
+rectangle = pygame.Rect(200, 12.5, 50, 50)
+circle = pygame.Rect(275, 12.5, 50, 50)
+trirect = pygame.Rect(350, 12.5, 50, 50)
+rhombrect = pygame.Rect(425, 12.5, 50, 50)
+
+eraser = pygame.Rect(700, 12.5, 50, 50)
+
+# creating polygons
+triangle = ((375, 12.5), (350, 62.5), (400, 62.5))
+rhombus = ((425, 37.5), (450, 12.5), (475, 37.5), (450, 62.5))
+
+#loading in eraser image
+eraseim = pygame.image.load("eraser.png")
+
+def toolbar(screen):
+    #draw toolbar
+    global tools
+    tools = pygame.draw.rect(screen, (128, 128, 128), (0, 0, screen.get_width(), 75))
+    
+
+    #draw colors
+    pygame.draw.rect(screen, RED, red)
+    pygame.draw.rect(screen, GREEN, green)
+    pygame.draw.rect(screen, BLUE, blue)
+    pygame.draw.rect(screen, BLACK, black)
+    pygame.draw.rect(screen, BLACK, rectangle, 1)
+    pygame.draw.circle(screen, BLACK, circle.center, circle.width / 2, 1)
+    pygame.draw.polygon(screen, BLACK, triangle, 1)
+    pygame.draw.polygon(screen, BLACK, rhombus, 1)
+
+    screen.blit(eraseim, eraser)
+
+
+
+#draw a circle all the way from point a to point b
+def drawLineBetween(screen, start, end, width, color):
+    dx = start[0] - end[0]
+    dy = start[1] - end[1]
+    iterations = max(abs(dx), abs(dy))
+    
+    for i in range(iterations):
+        progress = 1.0 * i / iterations
+        x = int(start[0] + progress * (end[0] - start[0]))
+        y = int(start[1] + progress * (end[1] - start[1]))
+        pygame.draw.circle(screen, color, (x, y), width)
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((640, 480))
+    screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
-
+    
+    active = False
     radius = 15
-    mode = 'blue'
-    points = []
-    drawing_rectangle = False
-    start_rect_pos = (0, 0)
-    end_rect_pos = (0, 0)
-    drawn_rect = None
-    drawing_circle = False
-    circle_center = (0, 0)
-    circle_radius = 0
-    drawing_triangle = False
-    triangle_points = []
-    drawing_rhombus = False
-    rhombus_center = (0, 0)
-    rhombus_side = 0
+    x = -1
+    y = -1
+    color = BLACK
+    mode = "norm"
+    
+    screen.fill((255, 255, 255))
+    toolbar(screen)
 
     while True:
-
+        
         pressed = pygame.key.get_pressed()
-
+        
         alt_held = pressed[pygame.K_LALT] or pressed[pygame.K_RALT]
         ctrl_held = pressed[pygame.K_LCTRL] or pressed[pygame.K_RCTRL]
+        shift_held = pressed[pygame.K_LSHIFT] or pressed[pygame.K_RSHIFT]
 
+
+        
         for event in pygame.event.get():
+            
+            # determin if X was clicked, or Ctrl+W or Alt+F4 was used
             if event.type == pygame.QUIT:
                 return
             if event.type == pygame.KEYDOWN:
@@ -49,128 +97,153 @@ def main():
                     return
                 if event.key == pygame.K_ESCAPE:
                     return
-                if event.key == pygame.K_r:
-                    mode = 'red'
-                elif event.key == pygame.K_g:
-                    mode = 'green'
-                elif event.key == pygame.K_b:
-                    mode = 'blue'
-                elif event.key == pygame.K_e:
-                    points = []
-                elif event.key == pygame.K_d:
-                    drawing_rectangle = True
-                    start_rect_pos = pygame.mouse.get_pos()
-                elif event.key == pygame.K_f:
-                    drawing_circle = True
-                    circle_center = pygame.mouse.get_pos()
-                elif event.key == pygame.K_a:
-                    drawing_triangle = True
-                    triangle_points = [pygame.mouse.get_pos()]
-                elif event.key == pygame.K_s:
-                    drawing_rhombus = True
-                    rhombus_center = pygame.mouse.get_pos()
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_d:
-                    end_rect_pos = pygame.mouse.get_pos()
-                    drawing_rectangle = False
-                    circle_radius = pygame.math.Vector2(circle_center).distance_to(
-                        pygame.math.Vector2(pygame.mouse.get_pos()))
-                    drawing_circle = False
-                elif event.key == pygame.K_a:
-                    if len(triangle_points) == 1:
-                        triangle_points.append(pygame.mouse.get_pos())
-                        triangle_points.append(calculateThirdPoint(triangle_points))
-                        drawing_triangle = False
-                elif event.key == pygame.K_s:
-                    drawing_rhombus = False
-                    rhombus_side = math.dist(rhombus_center, pygame.mouse.get_pos())
-
+                
+                # fill shortcut
+                if event.key == pygame.K_0:
+                    radius = max(screen.get_height(), screen.get_width())
+                # pencil shortcut
+                if event.key == pygame.K_1:
+                    radius = 1
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button == 4: # up whell radius grows
                     radius = min(200, radius + 1)
-                elif event.button == 3:
+
+                elif event.button == 5: # down whell radius shrinks
                     radius = max(1, radius - 1)
 
-            if event.type == pygame.MOUSEMOTION:
-                position = event.pos
-                points = points + [position]
-                points = points[-256:]
+                if event.button == 1:
+                    position = event.pos
+                    if tools.collidepoint(position):
+                        if blue.collidepoint(position):
+                            color = BLUE
+                        elif red.collidepoint(position):
+                            color = RED
+                        elif green.collidepoint(position):
+                            color = GREEN
+                        elif black.collidepoint(position):
+                            color = BLACK
+                        elif eraser.collidepoint(position):
+                            color = WHITE
+                            mode = "norm"
+                        elif rectangle.collidepoint(position):
+                            if mode != "rect":
+                                mode = "rect"
+                                print("to rect")
+                            else:
+                                mode = "norm"
+                                print("from rect")
+                        elif circle.collidepoint(position):
+                            if mode != "circle":
+                                mode = "circle"
+                            else:
+                                mode = "norm"
+                        elif trirect.collidepoint(position):
+                            if mode != "triangle":
+                                mode = "triangle"
+                            else:
+                                mode = "norm"
+                        elif rhombrect.collidepoint(position):
+                            if mode != "rhombus":
+                                mode = "rhombus"
+                            else:
+                                mode = "norm"
+                    
+                    else:
+                        if mode != "norm":
+                            x, y = event.pos
+                    active = True
 
-        screen.fill((0, 0, 0))
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    active = False
+                    if not tools.collidepoint(event.pos):
+                        if mode == "rect":
+                            resx, resy = event.pos
+                            if resx < x:
+                                x, resx = resx, x
+                            if resy < y:
+                                y, resy = resy, y
+                            width = resx - x
+                            height = resy - y
 
-        i = 0
-        while i < len(points) - 1:
-            drawLineBetween(screen, i, points[i], points[i + 1], radius, mode)
-            i += 1
+                            #hold shift to make a square
+                            if shift_held:
+                                width, height = min(width, height), min(width, height)
 
-        if drawing_rectangle:
-            end_rect_pos = pygame.mouse.get_pos()
-            drawn_rect = pygame.Rect(start_rect_pos,
-                                     (end_rect_pos[0] - start_rect_pos[0], end_rect_pos[1] - start_rect_pos[1]))
-            pygame.draw.rect(screen, getColor(mode), drawn_rect)
+                            to_draw = pygame.Rect(x, y, width, height)
+                            pygame.draw.rect(screen, color, to_draw, radius)
 
-        if drawing_circle:
-            circle_radius = pygame.math.Vector2(circle_center).distance_to(pygame.math.Vector2(pygame.mouse.get_pos()))
-            pygame.draw.circle(screen, getColor(mode), circle_center, int(circle_radius))
+                        elif mode == "circle":
+                            resx, resy = event.pos
+                            if resx < x:
+                                x, resx = resx, x
+                            if resy < y:
+                                y, resy = resy, y
+                            width = resx - x
+                            height = resy - y
+                            to_draw = pygame.Rect(x, y, width, height)
+                            pygame.draw.circle(screen, color, to_draw.center, min(width, height) / 2, radius)
 
-        if len(triangle_points) == 2:
-            pygame.draw.line(screen, getColor(mode), triangle_points[0], triangle_points[1], radius)
-        elif len(triangle_points) == 3:
-            pygame.draw.polygon(screen, getColor(mode), triangle_points)
+                        elif mode == "triangle":
+                            resx, resy = event.pos
+                            if shift_held:
+                                if resx < x:
+                                    x, resx = resx, x
+                                side = min(resx - x, 2 / (3 ** 0.5) * abs(resy - y))
+                                height = side * (3 ** 0.5) / 2
+                                # invert if dragged upwards
+                                if y < resy:
+                                    to_draw = ((x + side / 2, y), (x, y + height), (x + side, y + height))
+                                else:
+                                    to_draw = ((x, resy), (x + side, resy), (x + side / 2, resy + height))
 
-        if drawing_rhombus:
-            pygame.draw.polygon(screen, getColor(mode), calculateRhombusPoints(rhombus_center, rhombus_side))
+                            elif ctrl_held:
+                                # draw from single point to side along the hypotenuse
+                                to_draw = ((x, y), (x, resy), (resx, resy))
+                            else:
+                                if resx < x:
+                                    x, resx = resx, x
+                                # intentional that if you drag upwards you get an upside-down triangle
+                                to_draw = ((resx, resy), (x, resy), ((x + resx) / 2, y))
+
+                            if radius >= 5:
+                                pygame.draw.polygon(screen, color, to_draw)
+                            else:
+                                pygame.draw.polygon(screen, color, to_draw, radius)
+
+                        elif mode == "rhombus":
+                            resx, resy = event.pos
+                            if shift_held:
+                                if resx < x:
+                                    x, resx = resx, x
+                                if resy < y:
+                                    y, resy = resy, y
+                                diagonal = min(abs(resx - x), abs(resy - y))
+                                to_draw = ((x + diagonal / 2, y), (x + diagonal, y + diagonal / 2), (x + diagonal / 2, y + diagonal), (x, y + diagonal / 2))
+                            # for symmetrical polygons with given coordinates there is no need to check which is less
+                            else:
+                                to_draw = (((x + resx) / 2, y), (resx, (y + resy) / 2), ((x + resx) / 2, resy), (x, (y + resy) / 2))
+                            if radius >= 5:
+                                pygame.draw.polygon(screen, color, to_draw)
+                            else:
+                                pygame.draw.polygon(screen, color, to_draw, radius)
+
+            
+            if event.type == pygame.MOUSEMOTION and not tools.collidepoint(event.pos):
+                if mode == "norm":
+                    # get mouse position
+                    position = event.pos
+                    #don't draw when mouse first enters screen
+                    if active:
+                        if (x, y) != (-1, -1):
+                            drawLineBetween(screen, (x, y), position, radius, color)
+                    x, y = position
+
+        toolbar(screen)
 
         pygame.display.flip()
+        
         clock.tick(60)
-
-
-def drawLineBetween(screen, index, start, end, width, color_mode):
-    c1 = max(0, min(255, 2 * index - 256))
-    c2 = max(0, min(255, 2 * index))
-
-    if color_mode == 'blue':
-        color = (c1, c1, c2)
-    elif color_mode == 'red':
-        color = (c2, c1, c1)
-    elif color_mode == 'green':
-        color = (c1, c2, c1)
-
-    dx = start[0] - end[0]
-    dy = start[1] - end[1]
-    iterations = max(abs(dx), abs(dy))
-
-    for i in range(iterations):
-        progress = 1.0 * i / iterations
-        aprogress = 1 - progress
-        x = int(aprogress * start[0] + progress * end[0])
-        y = int(aprogress * start[1] + progress * end[1])
-        pygame.draw.circle(screen, color, (x, y), width)
-
-
-def getColor(mode):
-    if mode == 'blue':
-        return (0, 0, 255)
-    elif mode == 'red':
-        return (255, 0, 0)
-    elif mode == 'green':
-        return (0, 255, 0)
-
-
-def calculateThirdPoint(points):
-    a, b = points
-    c_x = (a[0] + b[0]) / 2 + (a[1] - b[1]) * math.sqrt(3) / 2
-    c_y = (a[1] + b[1]) / 2 + (b[0] - a[0]) * math.sqrt(3) / 2
-    return c_x, c_y
-
-
-def calculateRhombusPoints(center, side_length):
-    half_side = side_length / 2
-    top_point = (center[0], center[1] - half_side)
-    right_point = (center[0] + half_side, center[1])
-    bottom_point = (center[0], center[1] + half_side)
-    left_point = (center[0] - half_side, center[1])
-    return [top_point, right_point, bottom_point, left_point]
-
 
 main()

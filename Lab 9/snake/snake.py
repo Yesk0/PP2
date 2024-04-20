@@ -1,141 +1,203 @@
 import pygame
-from pygame.math import Vector2
-import datetime
-import random 
-
-class Snake:
-    def __init__(self):
-        self.body = [Vector2(7, 10), Vector2(6, 10), Vector2(5, 10)] # head, and body of the snake
-        self.eated = False # checker for snake eating
-        self.isDead = False # check snake death
-
-    def drawingSnake(self): # draw the snake
-        for block in self.body:
-            body_rect = pygame.Rect(block.x * cell_size, block.y * cell_size, cell_size, cell_size)
-            pygame.draw.rect(screen, (0 ,128 ,0), body_rect)
-
-    def snakeMoving(self): # move the snake
-        if self.eated == True:
-            body_copy = self.body[:]
-            body_copy.insert(0, body_copy[0] + direction)
-            self.body = body_copy[:]
-            self.eated = False
-        else:
-            body_copy = self.body[:-1]
-            body_copy.insert(0, body_copy[0] + direction)
-            self.body = body_copy[:]
-
-class Fruit:
-    def __init__(self):
-        self.randomize() # spawn fruit
-    
-    def drawingFruit(self): # draw fruit
-        fruit_rect = pygame.Rect(self.pos.x * cell_size, self.pos.y * cell_size, cell_size, cell_size) 
-        self.food = pygame.image.load(f'food{self.randomFood}.png').convert_alpha() # random fruit
-        self.food = pygame.transform.scale(self.food, (35, 35))
-        screen.blit(self.food, fruit_rect)
-
-    def randomize(self): # randomize fruit position and type
-        self.x = random.randint(0, cell_number - 2) 
-        self.y = random.randint(0, cell_number - 2) 
-        self.pos = Vector2(self.x, self.y)
-        self.randomFood = random.randint(1, 3)
-
-class Game:
-    def __init__(self):
-        self.snake = Snake() 
-        self.fruit = Fruit() 
-        self.level = 1 
-        self.snake_speed = 5 
-        self.score = 0 
-
-    def update(self): # update game state
-        self.snake.snakeMoving()
-        self.checkCollision()
-
-    def drawElements(self): # draw snake, fruit, score
-        self.snake.drawingSnake()
-        self.fruit.drawingFruit()
-        self.scoreDrawing()
-    
-    def checkCollision(self): # check collision with fruit
-        if(self.fruit.pos == self.snake.body[0]):
-            self.snake.eated = True
-            if(self.fruit.randomFood == 1):
-                self.score += 1
-            if(self.fruit.randomFood == 2):
-                self.score += 2
-            if(self.fruit.randomFood == 3):
-                self.score += 3
-            self.fruit.randomize()
-            self.levelAdding()
-
-    def gameOver(self): # check collision with borders and itself
-        if self.snake.body[0].x >= 19 or self.snake.body[0].x <= 0 or self.snake.body[0].y >= 19 or self.snake.body[0].y <= 0:
-            return True
-        for block in self.snake.body[1:]:
-            if block == self.snake.body[0]:
-                return True
-        return False
-    
-    def levelAdding(self): # increase level
-        if self.score % 3 == 0:
-            self.level += 1
-            self.snake_speed += 1
-    
-    def scoreDrawing(self): # draw score and level
-        score_text = "Score: " + str(self.score)
-        score_surface = font.render(score_text, True, (56, 74, 12))
-        score_rect = score_surface.get_rect(center = (cell_size * cell_number - 120, 40))
-        screen.blit(score_surface, score_rect)
-
-        level_text = "Level: " + str(self.level)
-        level_surface = font.render(level_text, True, (56, 74, 12))
-        level_rect = level_surface.get_rect(center = (cell_size * cell_number - 120, 70))
-        screen.blit(level_surface, level_rect)
+import copy
+import random, time
 
 pygame.init()
-clock = pygame.time.Clock()
-cell_size = 40
-cell_number = 20
-direction = Vector2(1, 0) 
-screen = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number)) 
-done = False
 
-font = pygame.font.Font('font.ttf', 25) 
+FPS = 5
+FramePerSec = pygame.time.Clock()
 
-nowSeconds = int((datetime.datetime.now()).strftime("%S"))
+#Creating colors
+BLUE  = pygame.Color(0, 0, 255)
+RED   = pygame.Color(255, 0, 0)
+GREEN = pygame.Color(0, 255, 0)
+YELLOW = pygame.Color(255, 255, 0)
+BLACK = pygame.Color(0, 0, 0)
+GRAY = pygame.Color(128, 128, 128)
+WHITE = pygame.Color(255, 255, 255)
 
-game = Game() 
- 
-while not done:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            if direction.x != -1:
-                direction = Vector2(1, 0)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            if direction.x != 1:
-                direction = Vector2(-1, 0)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-            if direction.y != 1:
-                direction = Vector2(0, -1)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-            if direction.y != -1:
-                direction = Vector2(0, 1)
 
-    if(game.gameOver() == True):
-        done = True
+#Other Variables for use in the program
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+SCORE = 0
+EXP = 0
+LVL = 1
+
+#Setting up Fonts
+font = pygame.font.SysFont("rubikbold", 60)
+font_small = pygame.font.SysFont("rubikbold", 20)
+game_over = font.render("Game Over", True, GREEN)
+
+#Create a white screen 
+screen = pygame.display.set_mode((800,600))
+screen.fill(BLACK)
+pygame.display.set_caption("Game")
+working = True
+#"""
+class Food(pygame.Rect):
+    def __init__(self):
+        # just setting the initial size, will be moved later
+        super().__init__(0, 0, 15, 15)
+        self.move(P1.pieces, walls)
+    # choosing which if its rare food to spawn
+    def get_type(self):
+        # choose which coin to spawn
+        id = random.randint(0, 9)
+        # set type and time to stay in one spot
+        if id == 9:
+            self.worth = 10
+            self.wait = random.randint(4000, 7000)
+            self.color = YELLOW
+        else:
+            self.worth = 1
+            self.wait = random.randint(7000, 10000)
+            self.color = RED
+        pygame.time.set_timer(MOVE_APPLE, self.wait, 1)
+    def move(self, snake, walls):
+        self.get_type()
+        # while intersecting with something choose another position
+        ok = False
+        while not ok:
+            ok = True
+            position = (random.randint(1, (SCREEN_WIDTH // 20) - 1), random.randint(1, (SCREEN_HEIGHT // 20) - 1))
+            self.center = (10 + 20 * position[0], 10 + 20 * position[1])
+            # checks for collision with any of the rects in snake or walls
+            if self.collidelist(snake) != -1 or self.collidelist(walls) != -1:
+                ok = False
+
+class Piece(pygame.Rect):
+    def __init__(self, left, top, width, height, direction):
+        super().__init__(left, top, width, height)
+        self.dir = direction
+
+class Player():
+    def __init__(self):
+        self.last_step = "right"
+        self.growth = False
+        # create a head
+        self.Head = Piece(400, 300, 20, 20, "right")
+        # create a list of all segments, including the head
+        self.pieces = [self.Head, Piece(381, 301, 18, 18, "right"), Piece(361, 301, 18, 18, "right")]
+       
+    def move(self):
+        # on turns where we grow, just duplicate the last piece
+        grew = 0
+        if self.growth:
+            new = copy.copy(self.pieces[-1])
+            self.pieces.append(new)
+            grew = 1
+            self.growth = False
+        # move each piece into the next piece's position
+        for id in range(len(self.pieces) - 1 - grew, 0, -1):
+            self.pieces[id].center = self.pieces[id - 1].center
+            self.pieces[id].dir = self.pieces[id - 1].dir
+        # move head into new position
+        if self.Head.dir == "right":
+            self.Head.centerx += 20
+        elif self.Head.dir == "left":
+            self.Head.centerx -= 20
+        elif self.Head.dir == "up":
+            self.Head.centery -= 20
+        elif self.Head.dir == "down":
+            self.Head.centery += 20
+        self.last_step = self.Head.dir
+
     
-    time = datetime.datetime.now()
-    seconds = int(time.strftime("%S"))
-    if abs(seconds - nowSeconds) > 3:
-        game.fruit.randomize()
-        nowSeconds = seconds
-    screen.fill((175, 215, 70))
-    game.drawElements()
-    game.update()
-    pygame.display.flip()
-    clock.tick(game.snake_speed)
+    def collide(self, objects, type):
+        if type == "snake":
+            for el_id in range(len(self.pieces)):
+                for block_id in range(el_id, len(objects)):
+                    if el_id != block_id:
+                        if self.pieces[el_id].colliderect(objects[block_id]):
+                            print(el_id, block_id)
+                            print(self.pieces[el_id], objects[block_id])
+                            return True
+        else:
+            for el in self.pieces:
+                if el.collidelist(objects) != -1:
+                    return True
+
+#Adding a new User event 
+LVL_UP = pygame.USEREVENT + 1
+MOVE_APPLE = pygame.USEREVENT + 2
+
+# initialize all objects
+walls = [pygame.Rect(0, 0, 780, 20), pygame.Rect(780, 0, 20, 580), pygame.Rect(0, 20, 20, 580), pygame.Rect(20, 580, 780, 20), pygame.Rect(100, 100, 20, 100)]
+P1 = Player()
+F1 = Food()
+
+
+all_objects = [P1, F1, walls]
+
+#Game Loop
+while working:
+      
+    #Cycles through all events occuring  
+    for event in pygame.event.get():
+        if event.type == MOVE_APPLE:
+            F1.move(P1.pieces, walls)
+        if event.type == LVL_UP:
+            LVL += 1
+            FPS = min(60, FPS + 1)
+        if event.type == pygame.QUIT:
+            working = False
+
+        if event.type == pygame.KEYDOWN:
+            if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and P1.last_step != "left":
+                P1.Head.dir = "right"
+            elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and P1.last_step != "up":
+                P1.Head.dir = "down"
+            elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and P1.last_step != "right":
+                P1.Head.dir = "left"
+            elif (event.key == pygame.K_UP or event.key == pygame.K_w) and P1.last_step != "down":
+                P1.Head.dir = "up"
+
+    screen.fill(BLACK)
+
+    #Moves and Re-draws all Sprites
+    P1.move()
+
+    #when eating an apple grow, gain points, exp and move it
+    if P1.Head.colliderect(F1):
+        # grow
+        P1.growth = True
+        # add score
+        SCORE += F1.worth 
+        # move apple to a new position
+        F1.move(P1.pieces, walls)
+
+        EXP += 1
+        # at 5 exp level up
+        if EXP >= max(4, LVL // 4):
+            pygame.event.post(pygame.event.Event(LVL_UP))
+            EXP = 0
+
+
+    #To be run if collision occurs between Player and Enemy
+    if P1.collide(P1.pieces, "snake") or P1.collide(walls, "walls"):
+          time.sleep(1)
+                   
+          screen.fill(BLUE)
+          screen.blit(game_over, (30,250))
+          
+          pygame.display.update()
+          time.sleep(2)
+          working = False
+
+    for el in P1.pieces:
+        pygame.draw.rect(screen, GREEN, el)
+    pygame.draw.rect(screen, F1.color, F1)
+    for w in walls:
+        pygame.draw.rect(screen, GRAY, w)
+
+    #blit score
+    scores = font_small.render(str(SCORE), True, GREEN)
+    screen.blit(scores, (10,10))
+    lvl = font_small.render(str(LVL), True, YELLOW)
+    screen.blit(lvl, (770, 10))
+
+    pygame.display.update()
+    FramePerSec.tick(FPS)
+
 pygame.quit()
