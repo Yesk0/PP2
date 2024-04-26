@@ -36,13 +36,8 @@ game_over = font.render("Game Over", True, BLACK)
 
 # loading in images
 background = pygame.image.load("car_game/AnimatedStreet.png")
-#coinsmall = pygame.image.load("images/Coins.png")
+
 coinmed = pygame.image.load("car_game/coin.png")
-#coinlarge = pygame.image.load("images/Coinl.png")
-
-# creating a weighted distribution of coins
-#coin_choice = [coinsmall, coinsmall, coinsmall, coinmed, coinmed, coinlarge]
-
 
 #Create a white screen 
 DISPLAYSURF = pygame.display.set_mode((400,600))
@@ -53,7 +48,6 @@ pygame.display.set_caption("Game")
 class Coin(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-    #    self.get_type()
         self.image = coinmed
         self.rect = self.image.get_rect()
         self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), random.randint(-200, 0))
