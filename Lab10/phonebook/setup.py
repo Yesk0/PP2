@@ -73,7 +73,6 @@ while not done:
         deleteAllData()
     elif x == 7:
         done = True
-
     conn.commit()
 
 cur.close()
