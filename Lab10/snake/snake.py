@@ -11,7 +11,7 @@ conn = psycopg2.connect(
     host="localhost",
     database="postgres",
     user="postgres",
-    password="admin"
+    password="12345678"
 )
 
 cur = conn.cursor()
@@ -31,7 +31,7 @@ class Snake:
             body_rect = pygame.Rect(block.x * cell_size, block.y * cell_size, cell_size, cell_size) # creating rectangle of the snake elements
             pygame.draw.rect(screen, (0 ,128 ,0), body_rect) # drawing the rectangles
         snake_head = pygame.Rect(self.body[0].x * cell_size, self.body[0].y * cell_size, cell_size, cell_size)
-        headTexture = pygame.image.load('snakehead.png')
+        headTexture = pygame.image.load(r'C:\Users\Asus\Desktop\github\PP2\lab10\snake\snakehead.png')
         headTexture = pygame.transform.scale(headTexture, (40, 40))
         screen.blit(headTexture, snake_head)
 
@@ -221,7 +221,7 @@ screen = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_numb
 done = False
 
 
-font = pygame.font.Font('font.ttf', 25) # imporing our font, from our file
+font = pygame.font.Font(r'C:\Users\Asus\Desktop\github\PP2\lab10\snake\font.ttf', 25) # imporing our font, from our file
 
 nowSeconds = int((datetime.datetime.now()).strftime("%S"))
 
@@ -229,9 +229,9 @@ game = Game() # creating the game object
 snake_speed = 150
 
 wall1 = [Vector2(9, 8), Vector2(9, 9), Vector2(9, 10), Vector2(9, 11)]
-wall_texture = pygame.image.load('cobble4040.png')
+wall_texture = pygame.image.load(r'C:\Users\Asus\Desktop\github\PP2\lab10\snake\cobble4040.png')
 wall_coordinates = []
-pause = pygame.image.load('pause.png')
+pause = pygame.image.load(r'C:\Users\Asus\Desktop\github\PP2\lab10\snake\pause.png')
 
 isPause = False
 
@@ -244,7 +244,7 @@ def name_checker(NAMEBOX):
     global user_name
     user_name = str(NAMEBOX.get_value())
     cnt = 0
-    cur.execute(' SELECT * FROM postgres.public.snake_scores ')
+    cur.execute(' SELECT * FROM snake_scores ')
     data = cur.fetchall()
 
     for row in data:

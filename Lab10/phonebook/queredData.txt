@@ -1,4 +1,10 @@
-Name: PersonName
-Number: PhoneNumber
-Name: Alibek
-Number: 87772221133
+Name: Zhanibek
+Number: 8700123123
+Name: Dsn
+Number: 2342343242
+Name: Slmsas
+Number: 234234
+Name: Ok
+Number: 234324
+Name: Yesko
+Number: 777
