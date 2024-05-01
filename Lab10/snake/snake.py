@@ -282,7 +282,7 @@ def start_the_game():
                 if direction.y != -1:
                     direction = Vector2(0, 1)   
             if event.type == pygame.KEYDOWN and event.key == pygame.K_i:
-                cur.execute(f''' INSERT INTO postgres.public.snake_scores("user", "user_score") VALUES( '{user_name}', '{game.score}'); ''')
+                cur.execute(f''' INSERT INTO snake_scores("user", "user_score") VALUES( '{user_name}', '{game.score}'); ''')
 
                 conn.commit()
                 cur.close()
@@ -291,8 +291,7 @@ def start_the_game():
 
         if(game.gameOver() == True): # if our game over returns true, we will end the game
 
-            cur.execute(f''' INSERT INTO postgres.public.snake_scores("user", "user_score") VALUES( '{user_name}', '{game.score}'); ''')
-
+            cur.execute(f''' INSERT INTO snake_scores("user", "user_score") VALUES( '{user_name}', '{game.score}'); ''')
             conn.commit()
             cur.close()
             conn.close()
